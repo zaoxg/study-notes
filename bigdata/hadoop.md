@@ -14,7 +14,7 @@
     node103
     node104
     ```
-    ![image-20240716230754488](../images/image-20240716230754488.png)
+    ![image-20240716230754488](./images/image-20240716230754488.png)
   
 - 配置 `hadoop-env.sh` 文件
   ```
@@ -126,16 +126,16 @@ hadoop namenode -format
 - 一键启动hdfs集群
   `start-dfs.sh`
   
-  ![image-20240717154521741](../images/image-20240717154521741.png)
+  ![image-20240717154521741](./images/image-20240717154521741.png)
   
 - 一键关闭hdfs集群
   `stop-dfs.sh`
   
-  ![image-20240717152211944](../images/image-20240717152211944.png)
+  ![image-20240717152211944](./images/image-20240717152211944.png)
 > 起不起来检查配置，看看哪没写对
 
 ### 管理页面
-![image-20240717151606984](../images/image-20240717151606984.png)
+![image-20240717151606984](./images/image-20240717151606984.png)
 
 在namenode的9870端口
 
@@ -190,7 +190,7 @@ hadoop fs -mkdir -p hdfs://node102:8020/bigdata/test
 > `-h` 人性化显示文件size
 > `-R` 递归查看指定目录及其子目录
 
-![image-20240717160607625](../images/image-20240717160607625.png)
+![image-20240717160607625](./images/image-20240717160607625.png)
 
 #### 上传文件到HDFS指定目录下
 - `hadoop fs -put [-f] [-p] <localsrc> ... <dst>`
@@ -201,7 +201,7 @@ hadoop fs -mkdir -p hdfs://node102:8020/bigdata/test
 > `localsrc` linux文件路径
 > `dst` hdfs路径 
 
-![image-20240717164813459](../images/image-20240717164813459.png)
+![image-20240717164813459](./images/image-20240717164813459.png)
 
 #### 查看HDFS文件内容
 - `hadoop fs -cat <src> ...`
@@ -226,7 +226,7 @@ hadoop fs -cat /bigdata/test/test.txt
 
 `hadoop fs -cp /bigdata/test/test.txt /bigdata/yellow/seed.txt`
 复制目的地的文件夹不存在会报错所以要提前创建
-![image-20240717171115061](../images/image-20240717171115061.png)
+![image-20240717171115061](./images/image-20240717171115061.png)
 
 #### 追加数据到HDFS文件
 将给定的本地文件的内容追加到给定的dst文件
@@ -236,7 +236,7 @@ hadoop fs -cat /bigdata/test/test.txt
 > `dst` 如果dst文件不存在，将创建该文件
 > `localsrc` 如果为-，则输入从标准输入中读取
 
-![image-20240717175717651](../images/image-20240717175717651.png)
+![image-20240717175717651](./images/image-20240717175717651.png)
 
 #### HDFS数据移动操作
 
@@ -245,7 +245,7 @@ hadoop fs -cat /bigdata/test/test.txt
   移动文件到指定文件夹下
   可以使用该命令移动数据，重命名文件的名称
 
-![image-20240717175237224](../images/image-20240717175237224.png)
+![image-20240717175237224](./images/image-20240717175237224.png)
 
 #### HDFS数据删除操作
 - `hadoop fs -rm -r [-skipTrash] URI [URI ...]`
