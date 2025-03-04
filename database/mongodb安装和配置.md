@@ -60,7 +60,7 @@ docker run -it \
 docker exec -it mongodb /bin/bash
 
 ##进入mongodb shell##
-mongo
+mongosh
 
 ##切换到admin库##
 > use admin
@@ -78,3 +78,20 @@ show users;
 db.createUser({user: "zzaox", pwd: "zzaox123", roles:["readWriteAnyDatabase", "dbAdminAnyDatabase","clusterAdmin" ]}
 )
 ```
+
+#### 修改用户的密码
+
+**正常修改密码：** `db.changeUserPassword("admin", "new_password")`
+
+**使用 `db.updateUser()` 修改：** `db.updateUser("admin", { pwd: "new_password" })`
+
+**密码丢失：** 需要以 `--noauth` 模式启动 MongoDB 来重置密码
+
+
+
+## 在windows下的docker安装
+
+```she
+docker run -it --name mongodb --restart=always --privileged -p 27017:27017 -v E:\docker\home\mongo\data:/data/db -v E:\docker\home\mongo\conf:/data/configdb -v E:\docker\home\mongo\logs:/data/log/ -d mongo -f /data/configdb/mongod.conf
+```
+
