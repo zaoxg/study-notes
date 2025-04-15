@@ -4,5 +4,5 @@
 
 **米斯卡，莫斯卡，米老鼠~**
 
-![41de9487617f89c98f0864e2f4159ea](https://github.com/user-attachments/assets/21698e33-1239-467d-8427-b8adcdec99b6 =200x200)
+![41de9487617f89c98f0864e2f4159ea](https://github.com/user-attachments/assets/21698e33-1239-467d-8427-b8adcdec99b6)
 
