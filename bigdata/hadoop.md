@@ -15,7 +15,7 @@
     node104
     ```
     ![image-20240716230754488](./images/image-20240716230754488.png)
-  
+
 - 配置 `hadoop-env.sh` 文件
   ```
   export JAVA_HOME=/server/jdk/jdk1.8.0_411
@@ -23,13 +23,19 @@
   export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
   export HADOOP_LOG_DIR=$HADOOP_HOME/logs
   ```
-  
+
 - 配置 `core-site.xml` 文件
   ```xml
   <configuration>
+      <!--  设置默认使用的文件系统-->
+      <property>
+          <name>fs.defaultFS</name>
+          <value>hdfs://node102:8020</value>
+      </property>
+    <!--  设置hadoop本地数据保存路径-->
     <property>
-      <name>fs.defaultFS</name>
-      <value>hdfs://node102:8020</value>
+      <name>hadoop.tmp.dir</name>
+      <value>131072</value>
     </property>
     <property>
       <name>io.file.buffer.size</name>
@@ -37,8 +43,13 @@
     </property>
   </configuration>
   ```
-  
+
+  **对于 `fs.defaultFS` (HDFS地址)**
+
+  - **必须**在所有Hadoop节点（NameNode和所有DataNodes）上配置且保持一致。
+
 - 配置 `hdfs-site.xml`文件
+
   ```xml
   <configuration>
     <property>
@@ -72,7 +83,7 @@
   + `dfs.namenodename.dir`:NameNode元数据的存储位置值:`/data/hadoop/nn`，在 `node102`节点的 `/data/hadoop/nn` 目录下
   + `dfs.namenode.hosts`:NameNode允许哪几个节点的DataNode连接(即允许加入集群)值: `node102`、`node103`、`node104`这三台服务器被授权
   + `dfs.blocksize` hdfs默认块大小
-  值:268435456(256MB)
+    值:268435456(256MB)
   + `dfs.namenode.handler.count` namenode处理的并发线程数值:100，以100个并行度处理文件系统的管理任务
   + `dfs.datanode.data.dir`：从节点DataNode的数据存储目录值:/data/dn，即数据存放在nodel、node2、node3，三台机器的/data/dn内
 
@@ -85,6 +96,7 @@
     ```
   + 在 `node103`、`node104`节点
     `sudo mkdir -p /data/hadoop/dn`
+
 - 分发hadoop文件夹
   以上操作已经完成了hadoop的配置，可以把配置好的hadoop发往其他机器
   ```
@@ -101,7 +113,7 @@
 export HADOOP_HOME=/server/hadoop-3.4.0
 export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 ```
-  刷新 `source /etc/profile`
+刷新 `source /etc/profile`
 2. 在其余节点配置同样的环境变/量
 
 ### 修改文件夹权限
@@ -125,12 +137,12 @@ hadoop namenode -format
 #### 启动
 - 一键启动hdfs集群
   `start-dfs.sh`
-  
+
   ![image-20240717154521741](./images/image-20240717154521741.png)
-  
+
 - 一键关闭hdfs集群
   `stop-dfs.sh`
-  
+
   ![image-20240717152211944](./images/image-20240717152211944.png)
 > 起不起来检查配置，看看哪没写对
 
@@ -195,11 +207,11 @@ hadoop fs -mkdir -p hdfs://node102:8020/bigdata/test
 #### 上传文件到HDFS指定目录下
 - `hadoop fs -put [-f] [-p] <localsrc> ... <dst>`
 - `hdfs dfs -put [-f] [-p] <localsrc> ... <dst>`
-如果文件已经存在会提示 `put: 'xx.txt': File exists`
+  如果文件已经存在会提示 `put: 'xx.txt': File exists`
 > `-f` 覆盖目标文件
 > `-p` 保留访问和修改时间、所有权和权限
 > `localsrc` linux文件路径
-> `dst` hdfs路径 
+> `dst` hdfs路径
 
 ![image-20240717164813459](./images/image-20240717164813459.png)
 
@@ -217,7 +229,7 @@ hadoop fs -cat /bigdata/test/test.txt
 #### 下载HDFS内容
 - `hadoop fs -get [-f] [-p] <src> ... <localdst>`
 - `hdfs dfs -get [-f] [-p] <src> ... <localdst>`
-`hadoop fs -get /bigdata/test/test.txt .`
+  `hadoop fs -get /bigdata/test/test.txt .`
 
 #### 拷贝HDFS文件
 命令是HDFS对HDFS的复制
@@ -272,4 +284,117 @@ hadoop fs -cat /bigdata/test/test.txt
 
 
 ## MapReduce
+
+
+
 ## YARN
+
+集群物理层面
+
+- ResourceManager
+- NodeManager
+
+App层面
+
+- ApplicationMaster（App Mstr）
+
+#### ResourceManager（RM）
+
+YARN集群中的 **主角色**，决定系统中所有应用程序之间 **资源分配的最终权限，即最终仲裁者**。
+
+接收用户的作业提交，并通过NM分配、管理各个机器上的计算资源。
+
+#### NodeManager（NM）
+
+YARN中的**从角色**，一台机器上一个，负责 **管理本机器上的计算资源**。
+
+根据RM命令，启动Container容器、监视容器的资源使用情况。并且向MM主角色汇报资源使用情况。
+
+#### ApplicationMaster（AM）
+
+用户提交的每个应用程序均包含一个AM。
+
+**应用程序内的“老大”**，负责程序内部各阶段的资源申请，监督程序的执行情况。
+
+### 核心交互流程
+
+- MR作业提交 Client -> RM
+- 资源的申请 MrAppMaster -> RM
+- MR作业状态汇报 Container(Map Reduce Task) -> Container(MrAppMaster)
+- 节点的状态汇报 NM -> RM
+
+### 整体概述
+
+当用户向 `YARN` 中提交一个应用程序后，`YARN`将分两个阶段运行该应用程序
+
+1. **客户端申请资源启动运行本次程序的 `ApplicationMaster`**
+2. **由 `ApplicationMaster`根据本次程序内部具体情况，为它申请资源，并监控它的整个运行过程，直到运行完成**
+
+#### MR提交YARN交互过程
+
+1. 用户通过客户端向YARN中ResourceManager提交应用程序(比如hadoop jar提交MR程序)
+
+2. Resourcellanager为该应用程序分配第一个Container(容器)，并与对应的NodeManager通信，要求它在这个Container中启动这个应用程序的ApplicationMaster。
+3. 第3步、ApplicationMaster启动成功之后，首先向Resourceanager注册并保持通信，这样用户可以直接通过ResourceManage查看应用程序的运行状态(处理了百分之几)
+4. AM为本次程序内部的各个Task任务向RM申请资源，并监控它的运行状态
+5. 一旦 ApplicationMaster 申请到资源后，便与对应的 NodeManager 通信，要求它启动任务,。
+6. NodeManager 为任务设置好运行环境后，将任务启动命令写到一个脚本中，,并通过运行该脚本启动任务,
+
+
+
+
+
+## 同步文件脚本
+
+**xsync同步脚本编写**
+
+该脚本的作用是可以同时给各个子节点发送文件。
+
+``````
+#!/bin/bash
+
+#1. 判断参数个数
+if [ $# -lt 1 ]
+then
+    echo Not Enough Argument!
+    exit;
+fi
+
+# 2. 遍历集群所有机器
+for host in node102 node103 node104
+do
+    echo ========== $host ==========
+    # 3. 遍历所有目录
+    for file in $@
+    do
+        # 4. 判断文件是否存在
+        if [ -e $file ]
+        then
+            # 5. 获取父目录
+            pdir=$(cd -P $(dirname $file); pwd)
+            # 6. 获取当前文件的名称
+            fname=$(basename $file)
+            ssh $host "mkdir -p $pdir"
+            rsync -av $pdir/$fname $host:$pdir
+        else
+            echo $file does not exists!
+        fi
+    done
+done
+``````
+
+配置环境变量
+
+**/etc/profile.d/my_env.sh**
+
+
+```
+# XSYNC_HOME
+export XSYNC_HOME=/home/hadoop
+export PATH=$PATH:$XSYNC_HOME/bin
+```
+
+``````
+xsync /server/hadoop-3.4.0/etc/hadoop/
+``````
+

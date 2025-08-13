@@ -2,6 +2,63 @@
 
 ## hive的安装
 
+### 安装前准备
+
+由于Hive是基于Hadoop的，需要保证服务器基础环境正常，Hadoop集群健康可用
+
+#### 服务器基础环境
+
+集群时间同步、防火墙关闭、主机Host映射、免密登录、JDK安装
+
+#### Hadoop集群健康可用
+
+启动Hive之前必须先启动Hadoop集群。需要注意，需 **等待HDFS安全模式完全关闭之后再启动运行Hive**
+
+Hive不是分布式安装运行的软件，其分布式特性主要借由Hadoop完成。包括分布式存储、计算
+
+### Hadoop与Hive整合
+
+**Hive需要把数据存储在HDFS上，并且需要使用MapReduce作为引擎处理数据，因此需要在Hadoop中添加相关配置属性，以满足Hive在hadoop上运行**
+
+- 修改hadoop中的`core-site.xml` 文件，并且集群同步配置文件，重启生效。
+  ```xml
+  <configuration>
+    <!- 整合Hive ->  
+    <property>
+      <name>hadoop.proxyuser.root.hosts</name>
+      <value>*</value>
+    </property>
+    <property>
+      <name>hadoop.proxyuser.root.groups</name>
+      <value>*</value>
+    </property>
+  </configuration>
+  ```
+
+### 安装mysql
+
+#### 授权
+
+先创建用户
+
+``````
+CREATE USER 'root'@'%' IDENTIFIED BY '123456';
+``````
+
+再授权
+
+``````
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+``````
+
+刷新配置
+
+``````
+FLUSH PRIVILEGES;
+``````
+
+
+
 ## 操作
 
 ### 数据导入和导出
