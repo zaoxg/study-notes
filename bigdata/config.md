@@ -15,8 +15,13 @@
     <property>
         <name>hadoop.tmp.dir</name>
         <value>/data/hadoop</value>
-        <description>A base for other temporary directories.</description>
     </property>
+    <!-- 文件系统垃圾桶 -->
+    <property>
+        <name>fs.trash.interval</name>
+        <value>1440</value>
+    </property>
+    
     <!-- 配置HDFS网页登录使用的静态用户为root -->
     <property>
         <name>hadoop.http.staticuser.user</name>
@@ -31,11 +36,6 @@
         <name>hadoop.proxyuser.root.groups</name>
         <value>*</value>
     </property>
-    <!-- 文件系统垃圾桶 -->
-    <property>
-        <name>fs.trash.interval</name>
-        <value>1440</value>
-    </property>
 </configuration>
 ```
 
@@ -44,14 +44,10 @@
 ```xml
 <configuration>
     <property>
-        <name>dfs.datanode.data.dir.perm</name>
-        <value>700</value>
-    </property>
-    <property>
         <name>dfs.namenode.name.dir</name>
         <value>/data/hadoop/nn</value>
     </property>
-        <property>
+    <property>
         <name>dfs.datanode.data.dir</name>
         <value>/data/hadoop/dn</value>
     </property>
@@ -59,14 +55,6 @@
     <property>
         <name>dfs.namenode.hosts</name>
         <value>node102,node103,node104</value>
-    </property>
-    <property>
-        <name>dfs.blockssize</name>
-        <value>268435456</value>
-    </property>
-    <property>
-        <name>dfs.namenode.handler.count</name>
-        <value>100</value>
     </property>
     
     <!-- nn web端访问地址 -->
@@ -77,7 +65,7 @@
     <!-- 2nn web端访问地址 -->
     <property>
         <name>dfs.namenode.secondary.http-address</name>
-        <value>node104:9868</value>
+        <value>node104:50090</value>
     </property>
 </configuration>
 ```
@@ -117,17 +105,18 @@
 ### yarn-site.xml
 ```xml
 <configuration>
-    <!-- 指定RM地址 -->
-    <property>
-        <description>The hostname of the RM.</description>
-        <name>yarn.resourcemanager.hostname</name>
-        <value>node102</value>
-    </property>
     <!-- Site specific YARN configuration properties -->
     <!-- 指定MR走shuffle -->
     <property>
         <name>yarn.nodemanager.aux-services</name>
         <value>mapreduce_shuffle</value>
+    </property>
+    
+    <!-- 指定RM地址 -->
+    <property>
+        <description>The hostname of the RM.</description>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>node103</value>
     </property>
 
     <!-- 是否对容器实施物理内存限制 -->
@@ -150,7 +139,7 @@
     <!-- 设置日志聚集服务器地址 -->
     <property>
         <name>yarn.log.server.url</name>
-        <value>http://node102:19888/jobhistory/logs</value>
+        <value>http://node103:19888/jobhistory/logs</value>
     </property>
     <!-- 设置日志保留时间为7天 -->
     <property>
@@ -159,3 +148,70 @@
     </property>
 </configuration>
 ```
+
+使用以下命令把etc/hadoop目录的配置发到其他节点
+
+ `scp -r etc/hadoop node103:`pwd`/`
+
+
+
+## Hive
+
+### hive-site.xml
+
+``````
+<configuration>
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:mysql://node102:3306/hive_metastore?createDatabaseIfNotExist=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>com.mysql.jdbc.Driver</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>root</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>123456</value>
+    </property>
+    <!-- 指定存储元数据要连接的地址 -->
+    <property>
+        <name>hive.metastore.uris</name>
+        <value>thrift://node102:9083</value>
+    </property>
+    <!-- 指定hiveserver2连接的host -->
+    <property>
+        <name>hive.server2.thrift.bind.host</name>
+        <value>node102</value>
+    </property>
+    <!-- 指定hiveserver2连接的端口号 -->
+    <property>
+        <name>hive.server2.thrift.port</name>
+        <value>10000</value>
+    </property>
+    <!-- HDFS 仓库目录 -->
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/user/hive/warehouse</value>
+    </property>
+    <property>
+        <name>hive.exec.scratchdir</name>
+        <value>/user/hive/tmp</value>
+    </property>
+    <!-- hiveserver2的高可用参数，如果不开会导致了开启tez session导致hiveserver2无法启动 -->
+    <property>
+        <name>hive.server2.active.passive.ha.enable</name>
+        <value>true</value>
+    </property>
+    <!--解决Error initializing notification event poll问题-->
+    <property>
+        <name>hive.metastore.event.db.notification.api.auth</name>
+        <value>false</value>
+    </property>
+</configuration>
+
+``````
+

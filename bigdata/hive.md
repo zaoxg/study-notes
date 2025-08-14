@@ -37,6 +37,12 @@ Hive不是分布式安装运行的软件，其分布式特性主要借由Hadoop�
 
 ### 安装mysql
 
+``````
+https://blog.csdn.net/weixin_45626288/article/details/133220238
+``````
+
+
+
 #### 授权
 
 先创建用户
@@ -56,6 +62,79 @@ GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
 ``````
 FLUSH PRIVILEGES;
 ``````
+
+### 安装hive
+
+#### 解决冲突
+
+``````
+rm -rf lib/guava-22.0.jar
+cp /server/hadoop-3.4.0/share/hadoop/common/lib/guava-27.0-jre.jar ./lib/
+``````
+
+#### 修改配置文件 `hive-env.sh`
+
+拷贝一份（改个名）
+
+``````
+mv hive-env.sh.template hive-env.sh
+``````
+
+vi `hive-env.sh`
+
+``````
+export HADOOP_HOME=/server/hadoop-3.4.0
+export HIVE_CONF_DIR=/server/hive-4.0.1/conf
+export HIVE_AUX_JARS_PATH=/server/hive-4.0.1/lib
+``````
+
+#### 安装驱动
+
+``````
+wget https://downloads.mysql.com/archives/get/p/3/file/mysql-connector-j-8.1.0.tar.gz
+
+tar -xzvf mysql-connector-j-8.1.0.tar.gz
+cp mysql-connector-j-8.1.0/mysql-connector-j-8.1.0.jar /server/hive-4.0.1/lib/
+``````
+
+#### 初始化hive数据库
+
+``````
+schematool -dbType mysql -initSchema
+``````
+
+**验证是否成功**：
+
+``````
+mysql -u root -p -e "USE hive_metastore; SHOW TABLES;"
+``````
+
+#### 配置 Hadoop 以支持 Hive
+
+``````
+hdfs dfs -mkdir -p /user/hive/warehouse
+hdfs dfs -mkdir -p /user/hive/tmp
+hdfs dfs -chmod -R 777 /user/hive
+``````
+
+#### 重启hadoop
+
+``````
+stop-dfs.sh && stop-yarn.sh
+start-dfs.sh && start-yarn.sh
+``````
+
+
+
+### hive环境变量
+
+``````
+# HIVE_HOME
+export HIVE_HOME=/server/hive-4.0.1
+export PATH=$PATH:$HIVE_HOME/bin
+``````
+
+
 
 
 

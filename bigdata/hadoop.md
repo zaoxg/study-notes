@@ -398,3 +398,22 @@ export PATH=$PATH:$XSYNC_HOME/bin
 xsync /server/hadoop-3.4.0/etc/hadoop/
 ``````
 
+
+
+
+
+``````
+# 启动hdfs
+start-dfs.sh
+# 启动yarn
+start-yarn.sh
+# 启动历史服务
+mr-jobhistory-daemon.sh start historyserver
+``````
+
+``````
+stop-yarn.sh
+stop-dfs.sh
+mr-jobhistory-daemon.sh stop historyserver
+``````
+
