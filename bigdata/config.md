@@ -1,5 +1,15 @@
 # 配置
 
+| ---- | ---- | node102 | node103 | node104 |
+|------| ---- | ------- | ------- | ------- |
+| HDFS |      |         |         |         |
+| YARN |      |         |         |         |
+| HIVE |      |         |         |         |
+
+
+
+
+
 ## hadoop
 
 ### core-site.xml
@@ -213,5 +223,42 @@
     </property>
 </configuration>
 
+``````
+
+## 一键启动脚本
+
+``````
+#!/bin/bash
+case $1 in
+"start"){
+    echo "----"
+    echo "-- 1. start metastore ... --"
+    nohup hive --service metastore -p 9083 >> /server/hive-4.0.1/logs/metastore.log 2>&1 &
+    echo "----"
+    sleep 3
+    echo "-- 2. start hiveserver2 ... --"
+    nohup hiveserver2 >> /server/hive-4.0.1/logs/hiveserver2.log 2>&1 &
+    echo "----"
+};;
+"status"){
+    echo "----"
+    echo "-- 1. check metastore status --"
+    ps -ef|grep metastore|grep -v 'grep'
+    echo "----"
+    echo "-- 2. check hiveserver2 status --"
+    ps -ef|grep hiveserver2|grep -v 'grep'
+    echo "----"
+};;
+"stop"){
+    echo "----"
+    echo "-- 1. stop metastore --"
+    ps -ef|grep metastore|grep -v 'grep'|awk '{print $2}'|xargs -n1 kill -9
+    echo "----"
+    sleep 3
+    echo "-- 2. stop hiveserver2 --"
+    ps -ef|grep hiveserver2|grep -v 'grep'|awk '{print $2}'|xargs -n1 kill -9
+    echo "----"
+};;
+esac
 ``````
 
