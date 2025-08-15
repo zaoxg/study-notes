@@ -158,10 +158,32 @@ export PATH=$PATH:$HIVE_HOME/bin
 ```
 
 
+## hive的一些概念
 
+### Metastore
+在 Hive 中，表名、表结构、字段名、字段类型、表的分隔符等统一被称为元数据。所有的元数据默认存储在 Hive 内置的 derby 数据库中，但由于 derby 只能有一个实例，也就是说不能有多个命令行客户端同时访问，所以在实际生产环境中，通常使用 MySQL 代替 derby。
+
+Hive 进行的是统一的元数据管理，就是说你在 Hive 上创建了一张表，然后在 presto／impala／sparksql 中都是可以直接使用的，它们会从 Metastore 中获取统一的元数据信息，同样的你在 presto／impala／sparksql 中创建一张表，在 Hive 中也可以直接使用。
+
+### 数据类型
+
+#### 基本数据类型
+
+| ---- | ----   | ---- |
+| ---- |--------| ---- |
+| Integers | 整型     | ---- |
+| Boolean | 布尔型    | ---- |
+| Floating point numbers | 浮点型 | ---- |
+| ---- | ------ | ---- |
+| ---- | ------ | ---- |
+| ---- | ------ | ---- |
+| ---- | ------ | ---- |
+| ---- | ------ | ---- |
 
 
 ## 操作
+
+### 
 
 ### 数据导入和导出
 从文件向表加载数据
@@ -237,3 +259,43 @@ load data local inpath '/home/xxx.txt' into table course_temp;
 -- 通过 insert overwrite 给桶表中加载数据
 insert overwrite table course select * from course_temp cluster by(c_id)
 ```
+
+
+
+## 命令
+
+在shell中连接到hive
+```shell
+hive
+!connect jdbc:hive2://node102:10000
+```
+
+### 常用命令
+
+#### Database
+
+查看数据库列表
+```shell
+show databases;
+```
+
+进入数据库
+```shell
+use database_name;
+```
+
+新建数据库
+
+- 语法
+```shell
+CREATE (DATABASE|SCHEMA) [IF NOT EXISTS] database_name   --DATABASE|SCHEMA 是等价的
+  [COMMENT database_comment] --数据库注释
+  [LOCATION hdfs_path] --存储在 HDFS 上的位置
+  [WITH DBPROPERTIES (property_name=property_value, ...)]; --指定额外属性
+```
+
+- 示例
+```shell
+CREATE DATABASE IF NOT EXISTS hive_test COMMENT '我是hive数据库' WITH DBPROPERTIES ('')
+```
+

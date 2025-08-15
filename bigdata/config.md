@@ -1,10 +1,12 @@
 # 配置
 
-| ---- | ---- | node102 | node103 | node104 |
-|------| ---- | ------- | ------- | ------- |
-| HDFS |      |         |         |         |
-| YARN |      |         |         |         |
-| HIVE |      |         |         |         |
+| ---- | ---- | node102         | node103     | node104           |
+| ---- | ---- | --------------- | ----------- | ----------------- |
+| HDFS |      | NameNode        |             | SecondaryNameNode |
+|      |      | DataNode        | DataNode    | DataNode          |
+| YARN |      | ResourceManager |             |                   |
+|      |      | NodeManager     | NodeManager | NodeManager       |
+| HIVE |      |                 |             |                   |
 
 
 
